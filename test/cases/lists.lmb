@@ -1,0 +1,20 @@
+letrec(
+  [
+    [empty  . {|list| atom(list) }],
+    [length . {|list| if(empty(list), 0, +(1, length(cdr(list)))) }],
+    [index  . {|list, i| if(=(0, i), car(list), index(cdr(list), -(i, 1))) }]
+  ],
+  =(
+    4,
+    +(
+      +(
+        =(0, empty([1, 2, 3])),
+        =(1, empty([]))
+      ),
+      +(
+        =(3, length([1, 2, 3])),
+        =(3, index([1, 2, 3], 2))
+      )
+    )
+  )
+)
