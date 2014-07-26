@@ -1,0 +1,10 @@
+car(
+  cons(
+    cdr(
+      cons(4, 5)
+    ),
+    car(
+      cons(6, 7)
+    )
+  )
+)
