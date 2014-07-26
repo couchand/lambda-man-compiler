@@ -1,0 +1,18 @@
+let(
+  [
+    [isWall      . {|v| =(v, 0)}],
+    [isEmpty     . {|v| =(v, 1)}],
+    [isPill      . {|v| =(v, 2)}],
+    [isPowerPill . {|v| =(v, 3)}],
+    [isFruitPos  . {|v| =(v, 4)}],
+    [isLambdaPos . {|v| =(v, 5)}],
+    [isGhostPos  . {|v| =(v, 6)}]
+  ],
+  =(
+    2,
+    +(
+      =(0, isWall(5)),
+      =(1, isWall(0))
+    )
+  )
+)

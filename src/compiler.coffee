@@ -132,6 +132,11 @@ class Compiler
               throw new Error 'airity mismatch, expecting 1, got '+ node.params.length
             instructions = instructions.concat @_compile node.params[0], scope
             instructions.push "CDR"
+          when 'atom'
+            if node.params.length isnt 1
+              throw new Error 'airity mismatch, expecting 1, got '+ node.params.length
+            instructions = instructions.concat @_compile node.params[0], scope
+            instructions.push "ATOM"
           when 'list'
             for param in node.params
               instructions = instructions.concat @_compile param, scope

@@ -1,0 +1,27 @@
+letrec(
+  [
+    [sum . {|list|
+      if(
+        atom(list),
+        0,
+        +(car(list), sum(cdr(list)))
+      )
+    }],
+    [map . {|list, mapper|
+      if(
+        atom(list),
+        0,
+        cons(
+          mapper(car(list)),
+          map(cdr(list), mapper)
+        )
+      )
+    }]
+  ],
+  sum(
+    map(
+      [1, 2, 3, 4, 5],
+      {|v| *(v, 2) }
+    )
+  )
+)
