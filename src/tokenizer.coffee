@@ -12,7 +12,7 @@ class Tokenizer
     @value = ''
 
     index = -1
-    for i, char of token when /[\n()\[\],.]/.test char
+    for i, char of token when /[\n(){}|\[\],.]/.test char
       index = +i
       break
 

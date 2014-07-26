@@ -7,6 +7,16 @@ class Parser
 
   parse: ->
     statements = []
+    awaiting = no
+
+    addStatement = (statement) ->
+      console.log 'adding statement', statement
+
+      unless awaiting
+        statements.push statement
+      else
+        statements.push args: awaiting, body: statement
+        awaiting = no
 
     until @input.isDone()
       token = @input.getToken()
@@ -39,7 +49,7 @@ class Parser
 
         when ']'
           elements = []
-          type = no
+          type = ','
 
           until @stack.length is 0
             elem = @stack.pop()
@@ -65,11 +75,52 @@ class Parser
             else
               throw new Error 'Unknown delimiter'
 
+        when '}'
+          inBody = yes
+          params = []
+          expressions = []
+          console.log 'rewinding block', @stack
+
+          until @stack.length is 0
+            expr = @stack.pop()
+
+            console.log 'reexamining', expr
+
+            break if expr is '{'
+            continue if expr is ','
+            if expr is '|'
+              unless inBody
+                expr = {params}
+              else
+                inBody = no
+              continue
+
+            unless /[{|,]/.test @stack[-1..][0]
+              throw new Error 'Too much input found: missing comma? missing brace?'
+
+            if inBody
+              expressions.unshift expr
+            else
+              params.unshift expr
+
+          unless expr is '{'
+            throw new Error 'Unmatched brace'
+
+          @stack.push parameters: params, closure: expressions
+
+        when '=>'
+          if awaiting
+            throw new Error 'no recursive function defines yet'
+
+          if @stack.length isnt 0 and @stack[-1..][0]?.list
+            awaiting = @stack.pop()
+          else
+            awaiting = list: []
+
         when '\n'
           console.log 'new', @stack.length
           if @stack.length is 1 and not /^[\[(,.]$/.test @stack[0]
-            console.log 'push'
-            statements.push @stack.pop()
+            addStatement @stack.pop()
           console.log 'newline', @stack, token, statements
 
         else
@@ -77,7 +128,7 @@ class Parser
           switch on
             when /^[0-9]+$/.test token
               @stack.push integer: parseInt token, 10
-            when /^[a-z+*/=>-]+$/.test token
+            when /^[a-zA-Z+*/=>-]+$/.test token
               @stack.push symbol: token
             else
               console.log 'pushing plain', token
@@ -89,7 +140,7 @@ class Parser
       throw new Error 'Too much input found: missing comma? missing paren?'
 
     if @stack.length
-      statements.push @stack.pop()
+      addStatement @stack.pop()
 
     unless statements.length
       throw new Error 'no input found'

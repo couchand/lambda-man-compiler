@@ -1,0 +1,10 @@
+let(
+  [[foo . 42]],
+  let(
+    [[bar . +(foo, 13)]],
+    let(
+      [[baz . *(bar, 7)]],
+      +(foo, +(bar, baz))
+    )
+  )
+)

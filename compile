@@ -6,7 +6,7 @@ compile = require './src/compile'
 
 unless process.argv[2] and /\.lmb$/.test process.argv[2]
   console.log 'Usage: ./compile <input.lmb>'
-  process.exit
+  process.exit()
 
 input = process.argv[2]
 output = input[...-4] + '.gcc'

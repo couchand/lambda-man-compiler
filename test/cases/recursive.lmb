@@ -1,0 +1,4 @@
+letrec(
+  [[countdown . {|value| if(>(value, 0), countdown(-(value, 1)), 0) }]],
+  countdown(15)
+)
