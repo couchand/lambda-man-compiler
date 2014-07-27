@@ -1,0 +1,4 @@
+letrec(
+  [[index . {|list, i| if(=(0, i), car(list), index(cdr(list), -(i, 1))) }]],
+  index(argv(0), argv(1))
+)
