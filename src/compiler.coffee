@@ -9,9 +9,6 @@ Tokenizer = require './tokenizer'
 
 MAX_INSTRUCTION_COUNT = 1048576
 
-argv = (d) ->
-  "LD 0 #{d}"
-
 checkCell = (d) ->
   """
     LDC #{d}
@@ -152,7 +149,7 @@ class Compiler
             child = scope.child()
             for pair in node.params[0].list
               console.log 'compiling child', pair
-              instructions = instructions.concat @_compile pair.tuple[1], child
+              instructions = instructions.concat @_compile pair.tuple[1], scope
               child.add pair.tuple[0]
             body = @_compile node.params[1], child
             guid = @addSubroutine body.concat ['RTN']
@@ -180,12 +177,22 @@ class Compiler
             instructions = instructions.concat @_compile node.params[0], scope
             instructions.push "SEL <%sub#{consequent}%> <%sub#{alternate}%>"
           when 'argv'
-            instructions.push argv node.params[0].integer
+            parents = 0
+            cursor = scope
+            while cursor.parent
+              parents += 1
+              cursor = cursor.parent
+
+            instructions.push "LD #{parents} #{node.params[0].integer}"
           when 'debug'
             if node.params.length isnt 1
               throw new Error 'airity mismatch, expecting 1, got '+ node.params.length
             instructions = instructions.concat @_compile node.params[0], scope
             instructions.push "DBUG"
+          when 'break'
+            if node.params.length
+              throw new Error 'airity mismatch, expecting 0, got '+ node.params.length
+            instructions.push "BRK"
 
           else
             index = scope.indexOf node.fn.symbol
