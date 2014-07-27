@@ -7,6 +7,7 @@ letrec(
     [mapArray . require('./lib/map')],
     [filter   . require('./lib/filter')],
     [sort     . require('./lib/sort')],
+    [length   . require('./lib/length')],
     [reverse  . require('./lib/reverse')],
     [sum      . require('./lib/sum')],
     [lsd      . require('./lib/lsd')]
@@ -21,6 +22,7 @@ letrec(
     [cell         . index(all, 12)],
     [lambdaStatus . index(all, 9)],
     [ghostStatus  . index(all, 10)],
+    [fruitStatus  . index(all, 11)],
     [vitality     . index(all, 13)],
     [location     . index(all, 14)],
     [direction    . index(all, 15)],
@@ -34,15 +36,18 @@ letrec(
     [isRight      . index(all, 27)],
     [isDown       . index(all, 28)],
     [isLeft       . index(all, 29)],
+    [noFruit      . index(all, 30)],
+    [hasFruit     . index(all, 31)]
   ], letrec(
   [
     [initial . left],
     [dangerFactor . 1],
-    [valueFactor . 200],
+    [valueFactor . 20],
     [pillFactor . 10],
     [powerFactor . 50],
     [fruitFactor . 1000],
     [distanceFactor . 2],
+    [maxDistance . 8],
     [ccw . {|dir|
       mod(+(dir, 3), 4)
     }],
@@ -58,35 +63,66 @@ letrec(
     [sumDanger . {|pos, ghosts|
       sum(mapArray(ghosts, danger(pos)))
     }],
-    [estimateValue . {|pos, dir, map|
+    [estimateValue . {|pos, dir, map, fruit|
 #debug(5547),
 #debug(pos),
 #debug(dir),
-      let(
+      letrec(
         [
           [distanceFactorSq . *(distanceFactor, distanceFactor)],
-          [there . navigate(pos, dir)],
-          [evaluate . {|pos|
+          [evaluate . {|pos, dir, level|
 #debug(5549),
 #debug(pos),
-            let(
-              [[spot . cell(map, pos)]],
-              sum(list(
-                *(pillFactor, isPill(spot)),
-                *(powerFactor, isPowerPill(spot)),
-                *(fruitFactor, isFruitPos(spot))
-              ))
+#debug(dir),
+#debug(level),
+            if(=(0, level), 0,
+              letrec(
+                [[spot . cell(map, navigate(pos, dir))]
+,
+[finish . {
+#debug(5544),
+#debug(level),
+#debug(navigate(pos, dir)),
+#debug(spot),
+#debug(fruit),
+                if(isWall(spot), 0,
+                  +(
+                    /(
+                      sum(list(
+                        *(pillFactor, isPill(spot)),
+                        *(powerFactor, isPowerPill(spot)),
+                        if(
+                          hasFruit(fruit),
+                          *(fruitFactor, isFruitPos(spot)),
+                          0
+                        )
+                      )),
+                      -(+(maxDistance, 1), level)
+                    ),
+                    sum(mapArray([up, right, left, down], {|next|
+#debug(5541),
+#debug(next),
+                      if(=(next, mod(+(2, dir), 4)), 0,
+                        evaluate(navigate(pos, dir), next, -(level, 1))
+                      )
+                    }))
+                  )
+                )
+}]],
+finish()
+              )
             )
           }]
         ],
-        sum(list(
-          evaluate(there),
-          /(evaluate(navigate(there, dir)), distanceFactor),
-          /(evaluate(navigate(there, ccw(dir))), distanceFactor),
-          /(evaluate(navigate(there, cw(dir))), distanceFactor),
-          /(evaluate(navigate(navigate(there, dir), ccw(dir))), distanceFactorSq),
-          /(evaluate(navigate(navigate(there, dir), cw(dir))), distanceFactorSq)
-        ))
+        evaluate(pos, dir, maxDistance)
+        #sum(list(
+        #  evaluate(there),
+        #  /(evaluate(navigate(there, dir)), distanceFactor),
+        #  /(evaluate(navigate(there, ccw(dir))), distanceFactor),
+        #  /(evaluate(navigate(there, cw(dir))), distanceFactor),
+        #  /(evaluate(navigate(navigate(there, dir), ccw(dir))), distanceFactorSq),
+        #  /(evaluate(navigate(navigate(there, dir), cw(dir))), distanceFactorSq)
+        #))
       )
     }],
     [openDirections . {|map, pos|
@@ -109,23 +145,27 @@ letrec(
   cons(initial, {|prev, state|
 #debug(5500),
 #debug(prev),
+#debug(length(state)),
+#debug(fruitStatus(state)),
     letrec(
       [
         [currentMap . map(state)],
         [currentLocation . location(lambdaStatus(state))],
         [currentGhosts . locations(ghostStatus(state))],
+        [currentFruit . fruitStatus(state)],
         [pick . {|options|
 #debug(5522),
 #debug(options),
 #debug(currentLocation),
 #debug(currentGhosts),
+#debug(currentFruit),
           let(
             [
               [dangers . mapArray([up, right, down, left], {|dir|
                 sumDanger(navigate(currentLocation, dir), currentGhosts)
               })],
               [values . mapArray([up, right, down, left], {|dir|
-                estimateValue(currentLocation, dir, currentMap)
+                estimateValue(currentLocation, dir, currentMap, currentFruit)
               })]
             ],
             let(
@@ -154,14 +194,19 @@ letrec(
                   if(atom(best), left,
                     if(
                       contains(options, car(best)),
-                      car(best),
+                      if(
+                        # break ties "randomly"
+                        >(1, length(filter(overall, {|score| =(score, index(overall, car(best)))}))),
+                        prev,
+                        car(best)
+                      ),
                       select(cdr(best))
                     )
                   )
                 }]],
                 let (
                   [[next . select(reverse(sort(overall)))]],
-                  cons(next, next)
+                  cons(if(=(prev, next), mod(+(prev, 1), 4), prev), next)
                 )
               )
             )

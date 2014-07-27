@@ -12,7 +12,7 @@ letrec(
     [map          . {|state| car(state)}],
     [lambdaStatus . {|state| car(cdr(state)) }],
     [ghostStatus  . {|state| car(cdr(cdr(state))) }],
-    [fruitStatus  . {|state| car(cdr(cdr(cdr(state)))) }],
+    [fruitStatus  . {|state| cdr(cdr(cdr(state))) }],
     [cell         . {|map, pos|
       if(
         *(
