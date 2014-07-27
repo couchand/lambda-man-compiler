@@ -7,7 +7,6 @@ class Parser
 
   parse: ->
     statements = []
-    awaiting = no
 
     addStatement = (statement) ->
       console.log 'adding statement', statement
@@ -107,15 +106,6 @@ class Parser
             throw new Error 'Unmatched brace'
 
           @stack.push parameters: params, closure: expressions
-
-        when '=>'
-          if awaiting
-            throw new Error 'no recursive function defines yet'
-
-          if @stack.length isnt 0 and @stack[-1..][0]?.list
-            awaiting = @stack.pop()
-          else
-            awaiting = list: []
 
         when '\n'
           console.log 'new', @stack.length

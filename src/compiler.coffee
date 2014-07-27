@@ -22,14 +22,6 @@ checkCell = (d) ->
 
 class Compiler
   constructor: (opts={}) ->
-    @globals =
-      isWall:           checkCell 0
-      isEmpty:          checkCell 1
-      isPill:           checkCell 2
-      isPowerPill:      checkCell 3
-      isFruitPosition:  checkCell 4
-      isLambdaPosition: checkCell 5
-      isGhostPosition:  checkCell 6
     @subroutines = []
     @cwd = opts.cwd or __dirname
 
@@ -44,11 +36,6 @@ class Compiler
     obj = instructions.join '\n'
 
     refs = {}
-    library = for name, instructions of @globals
-      refs[name] = counter
-      counter += instructions.length
-      instructions.join '\n'
-
     subs = for index, instructions of @subroutines
       refs["sub#{index}"] = counter
       counter += instructions.length
@@ -63,7 +50,7 @@ class Compiler
     if counter > MAX_INSTRUCTION_COUNT
       throw new Error 'Exceeded max instruction count'
 
-    obj + '\n' + library.join('\n') + '\n' + subs.join('\n')
+    obj + '\n' + subs.join('\n')
 
   _compile: (node, scope) ->
     console.log "compiling", node, "in scope", scope
@@ -72,9 +59,6 @@ class Compiler
 
     unless scope?
       scope = new Scope()
-    #  for name of @globals
-    #    scope.add name
-    #    instructions.push "LDF <%#{name}%>"
 
     switch on
       when Array.isArray node
@@ -151,11 +135,6 @@ class Compiler
               instructions = instructions.concat @_compile param, scope
             instructions.push "LDC 0"
             instructions.push "CONS" for [0...node.params.length]
-          #when 'define'
-          #  unless node.params[0].symbol
-          #    throw new Error "define expected lvalue"
-          #  scope[node.params[0].symbol] = node.params[1]
-          #  console.log scope
           when 'require'
             console.log 'require', node
             name = node.params[0].string
