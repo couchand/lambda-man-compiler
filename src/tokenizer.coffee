@@ -12,7 +12,7 @@ class Tokenizer
     @value = ''
 
     index = -1
-    for i, char of token when /[\n(){}|\[\],.]/.test char
+    for i, char of token when /[\n#(){}|\[\],.]/.test char
       index = +i
       break
 
@@ -20,6 +20,9 @@ class Tokenizer
       @value = token[1..]
       token = token[0]
       return token if token is '\n'
+      if token is '#'
+        @value = @value.replace /^[^\n]+/, ''
+        return @getToken()
     else unless -1 is index
       @value = token[index..]
       token = token[...index]
