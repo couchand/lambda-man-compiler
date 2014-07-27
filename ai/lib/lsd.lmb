@@ -1,5 +1,6 @@
 letrec(
   [
+    [length . require('./lib/length')],
     [index . {|list, i| if(=(0, i), car(list), index(cdr(list), -(i, 1))) }],
     [isWall       . {|v| =(v, 0)}],
     [isEmpty      . {|v| =(v, 1)}],
@@ -12,7 +13,16 @@ letrec(
     [lambdaStatus . {|state| car(cdr(state)) }],
     [ghostStatus  . {|state| car(cdr(cdr(state))) }],
     [fruitStatus  . {|state| car(cdr(cdr(cdr(state)))) }],
-    [cell         . {|map, pos| index(index(map, car(pos)), cdr(pos)) }],
+    [cell         . {|map, pos|
+      if(
+        *(
+          >(length(map), car(pos)),
+          >(length(car(map)), cdr(pos))
+        ),
+        index(index(map, car(pos)), cdr(pos)),
+        0
+      )
+    }],
     [vitality     . {|entity| car(entity)}],
     [location     . {|entity|
       letrec(

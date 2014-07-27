@@ -1,0 +1,176 @@
+letrec(
+  [
+    [state    . argv(0)],
+    [ghostAIs . argv(1)],
+    [index    . require('./lib/index')],
+    [mod      . require('./lib/mod')],
+    [mapArray . require('./lib/map')],
+    [filter   . require('./lib/filter')],
+    [sort     . require('./lib/sort')],
+    [reverse  . require('./lib/reverse')],
+    [sum      . require('./lib/sum')],
+    [lsd      . require('./lib/lsd')]
+  ], letrec(
+  [ [all . lsd()] ], letrec(
+  [
+    [isWall       . index(all, 1)],
+    [isPill       . index(all, 3)],
+    [isPowerPill  . index(all, 4)],
+    [isFruitPos   . index(all, 5)],
+    [map          . index(all, 8)],
+    [cell         . index(all, 12)],
+    [lambdaStatus . index(all, 9)],
+    [ghostStatus  . index(all, 10)],
+    [vitality     . index(all, 13)],
+    [location     . index(all, 14)],
+    [direction    . index(all, 15)],
+    [distance     . index(all, 33)],
+    [navigate     . index(all, 32)],
+    [up           . index(all, 22)],
+    [right        . index(all, 23)],
+    [down         . index(all, 24)],
+    [left         . index(all, 25)],
+    [isUp         . index(all, 26)],
+    [isRight      . index(all, 27)],
+    [isDown       . index(all, 28)],
+    [isLeft       . index(all, 29)],
+  ], letrec(
+  [
+    [initial . left],
+    [dangerFactor . 1],
+    [valueFactor . 200],
+    [pillFactor . 10],
+    [powerFactor . 50],
+    [fruitFactor . 1000],
+    [distanceFactor . 2],
+    [ccw . {|dir|
+      mod(+(dir, 3), 4)
+    }],
+    [cw . {|dir|
+      mod(+(dir, 1), 4)
+    }],
+    [locations . {|entities|
+      mapArray(entities, location)
+    }],
+    [danger . {|pos| {|ghost|
+      /(256, distance(pos, ghost))
+    }}],
+    [sumDanger . {|pos, ghosts|
+      sum(mapArray(ghosts, danger(pos)))
+    }],
+    [estimateValue . {|pos, dir, map|
+#debug(5547),
+#debug(pos),
+#debug(dir),
+      let(
+        [
+          [distanceFactorSq . *(distanceFactor, distanceFactor)],
+          [there . navigate(pos, dir)],
+          [evaluate . {|pos|
+#debug(5549),
+#debug(pos),
+            let(
+              [[spot . cell(map, pos)]],
+              sum(list(
+                *(pillFactor, isPill(spot)),
+                *(powerFactor, isPowerPill(spot)),
+                *(fruitFactor, isFruitPos(spot))
+              ))
+            )
+          }]
+        ],
+        sum(list(
+          evaluate(there),
+          /(evaluate(navigate(there, dir)), distanceFactor),
+          /(evaluate(navigate(there, ccw(dir))), distanceFactor),
+          /(evaluate(navigate(there, cw(dir))), distanceFactor),
+          /(evaluate(navigate(navigate(there, dir), ccw(dir))), distanceFactorSq),
+          /(evaluate(navigate(navigate(there, dir), cw(dir))), distanceFactorSq)
+        ))
+      )
+    }],
+    [openDirections . {|map, pos|
+#debug(5535),
+#debug(map),
+#debug(pos),
+      filter([up, right, down, left], {|dir|
+#debug(5539),
+#debug(dir),
+        =(0, isWall(cell(map, navigate(pos, dir))))
+      })
+    }],
+    [contains . {|list, el|
+      if(atom(list), 0,
+        if(=(car(list), el), 1, contains(cdr(list), el))
+      )
+    }]
+  ],
+
+  cons(initial, {|prev, state|
+#debug(5500),
+#debug(prev),
+    letrec(
+      [
+        [currentMap . map(state)],
+        [currentLocation . location(lambdaStatus(state))],
+        [currentGhosts . locations(ghostStatus(state))],
+        [pick . {|options|
+#debug(5522),
+#debug(options),
+#debug(currentLocation),
+#debug(currentGhosts),
+          let(
+            [
+              [dangers . mapArray([up, right, down, left], {|dir|
+                sumDanger(navigate(currentLocation, dir), currentGhosts)
+              })],
+              [values . mapArray([up, right, down, left], {|dir|
+                estimateValue(currentLocation, dir, currentMap)
+              })]
+            ],
+            let(
+              [[overall . mapArray([up, right, down, left], {|dir|
+#debug(5589),
+#debug(dir),
+#debug(index(dangers, dir)),
+#debug(index(values, dir)),
+                let(
+                  [
+                    [danger . index(dangers, dir)],
+                    [value . index(values, dir)]
+                  ],
+                  -(
+                    # because integer math
+                    +(/(value, dangerFactor), 100),
+                    /(danger, valueFactor)
+                  )
+                )
+              })]],
+              letrec(
+                [[select . {|best|
+#debug(5592),
+#debug(overall),
+#debug(best),
+                  if(atom(best), left,
+                    if(
+                      contains(options, car(best)),
+                      car(best),
+                      select(cdr(best))
+                    )
+                  )
+                }]],
+                let (
+                  [[next . select(reverse(sort(overall)))]],
+                  cons(next, next)
+                )
+              )
+            )
+          )
+        }]
+      ],
+      pick(openDirections(currentMap, currentLocation))
+      #debug(currentLocation)
+    )
+  })
+
+))))

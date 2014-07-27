@@ -70,6 +70,6 @@ letrec(
       )
     }]
   ],
-#  sort(argv(0))
-  sort([3, 1, 2, 4])
+  sort(argv(0))
+#  sort([3, 1, 2, 4])
 )

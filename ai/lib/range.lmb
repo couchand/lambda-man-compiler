@@ -1,0 +1,19 @@
+letrec(
+  [
+    [range . {|count|
+      letrec(
+        [
+          [kernel . {|current, length|
+            if(
+              =(current, length),
+              0,
+              cons(current, kernel(+(current, 1), length))
+            )
+          }]
+        ],
+        kernel(0, count)
+      )
+    }]
+  ],
+  range(argv(0))
+)

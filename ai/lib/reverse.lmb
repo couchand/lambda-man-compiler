@@ -1,0 +1,18 @@
+letrec(
+  [
+    [empty . {|list| atom(list) }],
+    [reverse . {|list|
+      letrec(
+        [[kernel . {|accum, list|
+          if(
+            empty(list),
+            accum,
+            kernel(cons(car(list), accum), cdr(list))
+          )
+        }]],
+        kernel([], list)
+      )
+    }]
+  ],
+  reverse(argv(0))
+)

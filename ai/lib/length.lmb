@@ -1,0 +1,12 @@
+letrec(
+  [
+    [length . {|list|
+      if(
+        atom(list),
+        0,
+        +(1, length(cdr(list)))
+      )
+    }]
+  ],
+  length(argv(0))
+)
