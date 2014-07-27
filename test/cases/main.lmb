@@ -1,0 +1,21 @@
+# main.lmb
+
+# by convention the main function is the one located at the 0 address.
+# it can take arguments, which are located in the root environment
+# frame.  in lambdaman-script, access them through the global `argv`,
+# a list with the standard encoding.
+
+let(
+  [
+    [state . argv(0)],
+    [ghosts . argv(1)]
+  ],
+  if(
+    =(2, +(
+      =(0, atom(state)),
+      =(0, atom(ghosts))
+    )),
+    cons(42, {cons(42, 3)}),  # goes left if params are correct
+    cons(0, {cons(0, 2)})     # goes down otherwise
+  )
+)

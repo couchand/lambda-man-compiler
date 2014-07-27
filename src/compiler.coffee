@@ -4,6 +4,9 @@ Scope = require './scope'
 
 MAX_INSTRUCTION_COUNT = 1048576
 
+argv = (d) ->
+  "LD 0 #{d}"
+
 checkCell = (d) ->
   """
     LDC #{d}
@@ -179,6 +182,8 @@ class Compiler
             alternate = @addSubroutine alternateBody.concat ['JOIN']
             instructions = instructions.concat @_compile node.params[0], scope
             instructions.push "SEL <%sub#{consequent}%> <%sub#{alternate}%>"
+          when 'argv'
+            instructions.push argv node.params[0].integer
 
           else
             index = scope.indexOf node.fn.symbol
