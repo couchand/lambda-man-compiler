@@ -1,0 +1,12 @@
+letrec(
+  [
+    [sum . {|list|
+      if(
+        atom(list),
+        0,
+        +(car(list), sum(cdr(list)))
+      )
+    }]
+  ],
+  sum(argv(0))
+)

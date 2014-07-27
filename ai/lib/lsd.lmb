@@ -36,7 +36,25 @@ letrec(
     [isDown       . {|direction| =(direction, down) }],
     [isLeft       . {|direction| =(direction, left) }],
     [noFruit      . {|fruit| =(fruit, 0) }],
-    [hasFruit     . {|fruit| >(fruit, 0) }]
+    [hasFruit     . {|fruit| >(fruit, 0) }],
+    [navigate     . {|pos, dir|
+      if(isUp(dir),     cons(-(car(pos), 1), cdr(pos)),
+      if(isRight(dir),  cons(car(pos), +(cdr(pos), 1)),
+      if(isDown(dir),   cons(+(car(pos), 1), cdr(pos)),
+      if(isLeft(dir),   cons(car(pos), -(cdr(pos), 1)),
+                        pos))))
+    }],
+    [absDiff      . {|a, b| if(>(a, b), -(a, b), -(b, a)) }],
+    [distance     . {|from, to|
+      let(
+        [
+          [dx . absDiff(car(from), car(to))],
+          [dy . absDiff(cdr(from), cdr(to))]
+        ],
+        # not pythagorean due to geometry
+        +(dx, dy)
+      )
+    }]
   ],
   list(
     index,        #  0
@@ -70,6 +88,8 @@ letrec(
     isDown,       # 28
     isLeft,       # 29
     noFruit,      # 30
-    hasFruit      # 31
+    hasFruit,     # 31
+    navigate,     # 32
+    distance      # 33
   )
 )

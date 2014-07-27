@@ -1,0 +1,171 @@
+debug(1000)
+
+letrec(
+  [
+    [state    . argv(0)],
+    [ghostAIs . argv(1)],
+    [index    . require('./lib/index')],
+    [mod      . require('./lib/mod')],
+    [mapArray . require('./lib/map')],
+    [filter   . require('./lib/filter')],
+    [sort     . require('./lib/sort')],
+    [sum      . require('./lib/sum')],
+    [lsd      . require('./lib/lsd')]
+  ], letrec(
+  [ [all . lsd()] ], letrec(
+  [
+    [isWall       . index(all, 1)],
+    [map          . index(all, 8)],
+    [cell         . index(all, 12)],
+    [lambdaStatus . index(all, 9)],
+    [ghostStatus  . index(all, 10)],
+    [vitality     . index(all, 13)],
+    [location     . index(all, 14)],
+    [direction    . index(all, 15)],
+    [distance     . index(all, 33)],
+    [navigate     . index(all, 32)],
+    [up           . index(all, 22)],
+    [right        . index(all, 23)],
+    [down         . index(all, 24)],
+    [left         . index(all, 25)],
+    [isUp         . index(all, 26)],
+    [isRight      . index(all, 27)],
+    [isDown       . index(all, 28)],
+    [isLeft       . index(all, 29)],
+  ], letrec(
+  [
+    [initial . left],
+    [locations . {|entities|
+#debug(9810),
+      mapArray(entities, location)
+    }],
+    [danger . {|pos|
+#debug(9833),
+#debug(pos),
+{|ghost|
+#debug(9834),
+#debug(ghost),
+      /(256, distance(pos, ghost))
+    }}],
+    [sumDanger . {|pos, ghosts|
+#debug(9771),
+#debug(pos),
+#debug(ghosts),
+      sum(mapArray(ghosts, danger(pos)))
+    }],
+    [quadrants . {|pos, ghosts|
+debug(3424),
+#debug(pos),
+#debug(ghosts),
+#debug(mapArray(ghosts, {|gh|
+#  debug(6574),
+#  debug(gh),
+#  location(gh)
+#})),
+#debug(mapArray(ghosts, location)),
+debug(sumDanger(pos, ghosts)),
+      list(
+        sumDanger(pos, filter(ghosts, {|ghost|
+          *(
+            >=(car(pos), car(ghost)),
+            >=(cdr(pos), cdr(ghost))
+          )
+        })),
+        sumDanger(pos, filter(ghosts, {|ghost|
+          *(
+            >=(car(ghost), car(pos)),
+            >=(cdr(pos), cdr(ghost))
+          )
+        })),
+        sumDanger(pos, filter(ghosts, {|ghost|
+          *(
+            >=(car(ghost), car(pos)),
+            >=(cdr(ghost), cdr(pos))
+          )
+        })),
+        sumDanger(pos, filter(ghosts, {|ghost|
+          *(
+            >=(car(pos), car(ghost)),
+            >=(cdr(ghost), cdr(pos))
+          )
+        }))
+      )
+    }],
+    [bestDirections . {|directions|
+debug(3509),
+debug(directions),
+      let(
+        [[sorted . sort(directions)]],
+        sorted
+      )
+    }]
+  ],
+
+  cons(initial, {|prev, state|
+    debug(3546),
+    #debug(location(lambdaStatus(state))),
+    #debug(locations(ghostStatus(state))),
+    let(
+      [[dangers . quadrants(
+        location(lambdaStatus(state)),
+        locations(ghostStatus(state))
+      )]],
+      let(
+        [[directions . list(
+          +(index(dangers, 0), index(dangers, 1)),
+          +(index(dangers, 1), index(dangers, 2)),
+          +(index(dangers, 2), index(dangers, 3)),
+          +(index(dangers, 3), index(dangers, 0))
+        )]],
+        letrec(
+          [[pick . {|dirs|
+debug(3577),
+debug(dirs),
+            if(atom(dirs), left,
+              if(
+                isWall(
+                  cell(
+                    map(state),
+                    navigate(
+                      location(lambdaStatus(state)),
+                      car(dirs)
+                    )
+                  )
+                ),
+                pick(cdr(dirs)),
+                car(dirs)
+              )
+            )
+          }]],
+  
+          let(
+            [[choice . pick(bestDirections(directions))]],
+            cons(choice, choice)
+          )
+
+        #  [
+        #    [bestLR . if(
+        #      >(index(directions, left), index(directions, right)),
+        #      right,
+        #      left
+        #    )],
+        #    [bestUD . if(
+        #      >(index(directions, up), index(directions, down)),
+        #      down,
+        #      up
+        #    )]
+        #  ],
+        #  let(
+        #    [[best . if(
+        #      >(index(directions, bestLR), index(directions, bestUD)),
+        #      bestUD,
+        #      bestLR
+        #    )]],
+        #    cons(best, best)
+        #  )
+        )
+      )
+    )
+  })
+
+))))

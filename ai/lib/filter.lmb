@@ -1,0 +1,19 @@
+letrec(
+  [
+    [filter . {|list, filterer|
+      if(
+        atom(list),
+        0,
+        if(
+          filterer(car(list)),
+          cons(
+            car(list),
+            filter(cdr(list), filterer)
+          ),
+          filter(cdr(list), filterer)
+        )
+      )
+    }]
+  ],
+  filter(argv(0), argv(1))
+)

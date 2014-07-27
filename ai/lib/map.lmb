@@ -1,0 +1,18 @@
+#debug(4443)
+letrec(
+  [
+    [map . {|list, mapper|
+#      debug(7658),
+#      debug(list),
+      if(
+        atom(list),
+        0,
+        cons(
+          mapper(car(list)),
+          map(cdr(list), mapper)
+        )
+      )
+    }]
+  ],
+  map(argv(0), argv(1))
+)
