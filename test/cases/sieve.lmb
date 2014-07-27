@@ -1,0 +1,84 @@
+letrec(
+  [
+    [empty  . {|list| atom(list) }],
+    [length . {|list| if(empty(list), 0, +(1, length(cdr(list)))) }],
+    [index  . {|list, i| if(=(0, i), car(list), index(cdr(list), -(i, 1))) }],
+    [clear  . {|list, i| if(=(0, i), cons(0, cdr(list)), clear(cdr(list), -(i, 1))) }],
+    [mod . {|a, b|
+      if(
+        >(b, a),
+        a,
+        mod(-(a, b), b)
+      )
+    }],
+    [range . {|count|
+      letrec(
+        [
+          [kernel . {|current, length|
+            if(
+              =(current, length),
+              0,
+              cons(current, kernel(+(current, 1), length))
+            )
+          }]
+        ],
+        kernel(0, count)
+      )
+    }],
+    [map . {|list, mapper|
+      if(
+        atom(list),
+        0,
+        cons(
+          mapper(car(list)),
+          map(cdr(list), mapper)
+        )
+      )
+    }],
+    [filter . {|list, filterer|
+      if(
+        atom(list),
+        0,
+        if(
+          filterer(car(list)),
+          cons(
+            car(list),
+            filter(cdr(list), filterer)
+          ),
+          filter(cdr(list), filterer)
+        )
+      )
+    }],
+    [reverse . {|list|
+      letrec(
+        [[kernel . {|accum, list|
+          if(
+            empty(list),
+            accum,
+            kernel(cons(car(list), accum), cdr(list))
+          )
+        }]],
+        kernel([], list)
+      )
+    }],
+    [max . 15],
+    [start . 2]
+  ],
+  letrec(
+    [
+      [primes . cdr(cdr(range(max)))],
+      [step . {|remaining, primes|
+
+        if(
+          empty(remaining),
+          reverse(primes),
+          step(filter(cdr(remaining), {|v|
+            mod(v, car(remaining))
+          }), cons(car(remaining), primes))
+        )
+
+      }]
+    ],
+    step(primes, [])
+  )
+)

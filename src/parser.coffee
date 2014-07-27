@@ -30,7 +30,7 @@ class Parser
           until @stack.length is 0
             param = @stack.pop()
 
-            console.log 'rexamining', param
+            console.log 'reexamining', param
 
             break if param is '('
             continue if param is ','

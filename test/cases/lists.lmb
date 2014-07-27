@@ -2,18 +2,36 @@ letrec(
   [
     [empty  . {|list| atom(list) }],
     [length . {|list| if(empty(list), 0, +(1, length(cdr(list)))) }],
-    [index  . {|list, i| if(=(0, i), car(list), index(cdr(list), -(i, 1))) }]
+    [index  . {|list, i| if(=(0, i), car(list), index(cdr(list), -(i, 1))) }],
+    [reverse . {|list|
+      letrec(
+        [[kernel . {|accum, list|
+          if(
+            empty(list),
+            accum,
+            kernel(cons(car(list), accum), cdr(list))
+          )
+        }]],
+        kernel([], list)
+      )
+    }]
   ],
   =(
-    4,
+    6,
     +(
       +(
         =(0, empty([1, 2, 3])),
         =(1, empty([]))
       ),
       +(
-        =(3, length([1, 2, 3])),
-        =(3, index([1, 2, 3], 2))
+        +(
+          =(3, length([1, 2, 3])),
+          =(3, index([1, 2, 3], 2))
+        ),
+        +(
+          =(3, car(reverse([1, 2, 3]))),
+          =(1, car(reverse(reverse([1, 2, 3]))))
+        )
       )
     )
   )
