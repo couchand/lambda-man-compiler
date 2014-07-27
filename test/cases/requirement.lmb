@@ -1,0 +1,5 @@
+# require me
+
+# export one function, a wrapper around add
+
++(argv(0), argv(1))

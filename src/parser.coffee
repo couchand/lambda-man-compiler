@@ -130,6 +130,8 @@ class Parser
               @stack.push integer: parseInt token, 10
             when /^[a-zA-Z+*/=>-]+$/.test token
               @stack.push symbol: token
+            when /^['"]/.test token
+              @stack.push string: token[1...-1]
             else
               console.log 'pushing plain', token
               @stack.push token

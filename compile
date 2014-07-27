@@ -1,6 +1,7 @@
 #!/usr/bin/coffee
 
 fs = require 'fs'
+path = require 'path'
 
 compile = require './src/compile'
 
@@ -11,7 +12,9 @@ unless process.argv[2] and /\.lmb$/.test process.argv[2]
 input = process.argv[2]
 output = input[...-4] + '.gcc'
 
+cwd = path.join process.cwd(), path.dirname(input)
+
 code = fs.readFileSync input
   .toString()
 
-fs.writeFileSync output, compile code
+fs.writeFileSync output, compile code, cwd

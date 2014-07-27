@@ -1,6 +1,11 @@
 # compiler
 
+fs = require 'fs'
+path = require 'path'
+
 Scope = require './scope'
+Parser = require './parser'
+Tokenizer = require './tokenizer'
 
 MAX_INSTRUCTION_COUNT = 1048576
 
@@ -16,7 +21,7 @@ checkCell = (d) ->
   """.split '\n'
 
 class Compiler
-  constructor: ->
+  constructor: (opts={}) ->
     @globals =
       isWall:           checkCell 0
       isEmpty:          checkCell 1
@@ -26,6 +31,7 @@ class Compiler
       isLambdaPosition: checkCell 5
       isGhostPosition:  checkCell 6
     @subroutines = []
+    @cwd = opts.cwd or __dirname
 
   addSubroutine: (subroutine) ->
     @subroutines.push subroutine
@@ -150,6 +156,18 @@ class Compiler
           #    throw new Error "define expected lvalue"
           #  scope[node.params[0].symbol] = node.params[1]
           #  console.log scope
+          when 'require'
+            console.log 'require', node
+            name = node.params[0].string
+            name += '.lmb' unless /\.lmb$/.test name
+            f = path.join @cwd, name
+            unless fs.existsSync f
+              throw new Error 'unable to locate require ' + f
+            fc = fs.readFileSync f
+            parser = new Parser new Tokenizer fc.toString()
+            body = @_compile parser.parse()
+            guid = @addSubroutine body.concat ['RTN']
+            instructions.push "LDF <%sub#{guid}%>"
           when 'let'
             console.log 'entering let', scope, node
             child = scope.child()

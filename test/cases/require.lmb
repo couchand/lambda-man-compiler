@@ -1,0 +1,10 @@
+# require example
+
+# import an external function
+
+let(
+  [
+    [sum . require('./requirement')]
+  ],
+  sum(42, 7)
+)
