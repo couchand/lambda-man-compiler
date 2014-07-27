@@ -1,0 +1,75 @@
+# "sort" a list
+
+# returns the permutation required to get list sorted
+
+letrec(
+  [
+    [box . {|list|
+      letrec(
+        [[kernel . {|list, index|
+          if(atom(list), 0,
+            cons(
+              cons(car(list), index),
+              kernel(cdr(list), +(index, 1))
+            )
+          )
+        }]],
+        kernel(list, 0)
+      )
+    }],
+    [biggest . {|boxes|
+      letrec(
+        [
+          [finish . {|item| {|result|
+            cons(
+              car(result),
+              if(
+                =(cdr(car(result)), cdr(item)),
+                cdr(result),
+                cons(item, cdr(result))
+              )
+            )
+          }}],
+          [kernel . {|list, contender|
+            if(atom(list), [contender . 0],
+              let(
+                [
+                  [done . finish(car(list))],
+                  [result . if(
+                    >(car(car(list)), car(contender)),
+                    kernel(cdr(list), car(list)),
+                    kernel(cdr(list), contender),
+                  )]
+                ],
+                done(result)
+              )
+            )
+          }]
+        ],
+        if(atom(boxes), 255,
+          let(
+            [[done . finish(car(boxes))]],
+            done(kernel(cdr(boxes), car(boxes)))
+          )
+        )
+      )
+    }],
+    [sort . {|list|
+      letrec(
+        [
+          [kernel . {|boxes, accum|
+            if(atom(boxes), accum,
+              let(
+                [[max . biggest(boxes)]],
+                kernel(cdr(max), cons(cdr(car(max)), accum))
+              )
+            )
+          }]
+        ],
+        kernel(box(list), [])
+      )
+    }]
+  ],
+#  sort(argv(0))
+  sort([3, 1, 2, 4])
+)
