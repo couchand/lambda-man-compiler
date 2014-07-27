@@ -1,0 +1,4 @@
+let(
+  [[foobar . 42]],
+  debug(foobar)
+)

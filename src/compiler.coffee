@@ -202,6 +202,11 @@ class Compiler
             instructions.push "SEL <%sub#{consequent}%> <%sub#{alternate}%>"
           when 'argv'
             instructions.push argv node.params[0].integer
+          when 'debug'
+            if node.params.length isnt 1
+              throw new Error 'airity mismatch, expecting 1, got '+ node.params.length
+            instructions = instructions.concat @_compile node.params[0], scope
+            instructions.push "DBUG"
 
           else
             index = scope.indexOf node.fn.symbol
