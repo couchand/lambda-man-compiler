@@ -1,0 +1,75 @@
+letrec(
+  [
+    [index . {|list, i| if(=(0, i), car(list), index(cdr(list), -(i, 1))) }],
+    [isWall       . {|v| =(v, 0)}],
+    [isEmpty      . {|v| =(v, 1)}],
+    [isPill       . {|v| =(v, 2)}],
+    [isPowerPill  . {|v| =(v, 3)}],
+    [isFruitPos   . {|v| =(v, 4)}],
+    [isLambdaPos  . {|v| =(v, 5)}],
+    [isGhostPos   . {|v| =(v, 6)}],
+    [map          . {|state| car(state)}],
+    [lambdaStatus . {|state| car(cdr(state)) }],
+    [ghostStatus  . {|state| car(cdr(cdr(state))) }],
+    [fruitStatus  . {|state| car(cdr(cdr(cdr(state)))) }],
+    [cell         . {|map, pos| index(index(map, car(pos)), cdr(pos)) }],
+    [vitality     . {|entity| car(entity)}],
+    [location     . {|entity|
+      letrec(
+        [[pos . car(cdr(entity))]],
+        cons(cdr(pos), car(pos))
+      )
+    }],
+    [direction    . {|entity| car(cdr(cdr(entity))) }],
+    [lives        . {|entity| car(cdr(cdr(cdr(entity)))) }],
+    [score        . {|entity| car(cdr(cdr(cdr(cdr(entity))))) }],
+    [isStandard   . {|vitality| =(vitality, 0) }],
+    [isPowerMode  . {|vitality| >(vitality, 0) }],
+    [isFrightMode . {|vitality| =(vitality, 1) }],
+    [isInvisible  . {|vitality| =(vitality, 2) }],
+    [up           . 0],
+    [right        . 1],
+    [down         . 2],
+    [left         . 3],
+    [isUp         . {|direction| =(direction, up) }],
+    [isRight      . {|direction| =(direction, right) }],
+    [isDown       . {|direction| =(direction, down) }],
+    [isLeft       . {|direction| =(direction, left) }],
+    [noFruit      . {|fruit| =(fruit, 0) }],
+    [hasFruit     . {|fruit| >(fruit, 0) }]
+  ],
+  list(
+    index,        #  0
+    isWall,       #  1
+    isEmpty,      #  2
+    isPill,       #  3
+    isPowerPill,  #  4
+    isFruitPos,   #  5
+    isLambdaPos,  #  6
+    isGhostPos,   #  7
+    map,          #  8
+    lambdaStatus, #  9
+    ghostStatus,  # 10
+    fruitStatus,  # 11
+    cell,         # 12
+    vitality,     # 13
+    location,     # 14
+    direction,    # 15
+    lives,        # 16
+    score,        # 17
+    isStandard,   # 18
+    isPowerMode,  # 19
+    isFrightMode, # 20
+    isInvisible,  # 21
+    up,           # 22
+    right,        # 23
+    down,         # 24
+    left,         # 25
+    isUp,         # 26
+    isRight,      # 27
+    isDown,       # 28
+    isLeft,       # 29
+    noFruit,      # 30
+    hasFruit      # 31
+  )
+)

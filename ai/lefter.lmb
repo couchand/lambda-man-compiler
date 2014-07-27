@@ -1,0 +1,91 @@
+let(
+  [
+    [state        . argv(0)],
+    [ghostAIs     . argv(1)],
+    [mod          . require('./lib/mod')],
+    [lsd          . require('./lib/lsd')],
+  ],
+  letrec(
+    [
+      [all          . lsd()],
+    ],
+    letrec(
+      [
+        [index        . car(all)],
+      ],
+      letrec(
+        [
+          [isWall       . index(all, 1)],
+          [map          . index(all, 8)],
+          [cell         . index(all, 12)],
+          [lambdaStatus . index(all, 9)],
+          [location     . index(all, 14)],
+          [up           . index(all, 22)],
+          [right        . index(all, 23)],
+          [down         . index(all, 24)],
+          [left         . index(all, 25)],
+          [isUp         . index(all, 26)],
+          [isRight      . index(all, 27)],
+          [isDown       . index(all, 28)],
+          [isLeft       . index(all, 29)],
+        ],
+        letrec(
+          [
+            [navigate     . {|pos, dir|
+              if(isUp(dir),     cons(-(car(pos), 1), cdr(pos)),
+              if(isRight(dir),  cons(car(pos), +(cdr(pos), 1)),
+              if(isDown(dir),   cons(+(car(pos), 1), cdr(pos)),
+              if(isLeft(dir),   cons(car(pos), -(cdr(pos), 1)),
+                                pos))))
+            }],
+            [isAvailable  . {|map, pos|
+debug(4000),
+debug(pos),
+debug(cell(map, pos)),
+#debug(isWall(0)),
+#debug(isWall(cell(map, pos))),
+#              letrec(
+#                [[contents . cell(map, pos)]],
+#                =(0, isWall(contents))
+#              )
+=(0, isWall(cell(map, pos)))
+            }],
+          ],
+          letrec(
+            [[chooseDir    . {|prev, state|
+debug(1000),
+debug(prev),
+              letrec(
+                [
+                  [currentMap . map(state)],
+                  [currentPos . location(lambdaStatus(state))],
+                  [findDir . {|dir|
+debug(2000),
+debug(dir),
+debug(currentPos),
+debug(navigate(currentPos, dir)),
+debug(3000),
+debug(isAvailable(currentMap, navigate(currentPos, dir))),
+debug(5000),
+                    letrec(
+                      [[proposal . navigate(currentPos, dir)]],
+                      if(
+#                        isAvailable(currentMap, proposal),
+=(0, isWall(cell(currentMap, proposal))),
+                        cons(dir, dir),
+                        findDir(if(=(0, dir), 3, -(dir, 1)))
+                      )
+                    )
+                  }]
+                ],
+                findDir(prev)
+              )
+
+            }]],
+            cons(down, chooseDir)
+          )
+        )
+      )
+    )
+  )
+)

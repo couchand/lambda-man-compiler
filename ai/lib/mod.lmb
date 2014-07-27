@@ -1,0 +1,14 @@
+# mod
+
+letrec(
+  [
+    [mod . {|a, b|
+      if(
+        >(b, a),
+        a,
+        mod(-(a, b), b)
+      )
+    }]
+  ],
+  mod(argv(0), argv(1))
+)
