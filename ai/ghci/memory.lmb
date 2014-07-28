@@ -1,0 +1,35 @@
+let(
+  [
+    [map . require('../lib/map')],
+    [range . require('../lib/range')]
+  ],
+  letrec(
+    [
+      [create . {|size|
+        map(range(size), {0})
+      }],
+      [get . {|store, index|
+#debug(880),
+#debug(store),
+#debug(index),
+        if(
+          =(0, index),
+          car(store),
+          get(cdr(store), -(index, 1))
+        )
+      }],
+      [set . {|store, index, value|
+        if(
+          =(0, index),
+          cons(value, cdr(store)),
+          cons(car(store), set(-(index, 1), cdr(store)))
+        )
+      }]
+    ],
+    list(
+      create,   # 0
+      get,      # 1
+      set,      # 2
+    )
+  )
+)

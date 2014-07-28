@@ -1,0 +1,64 @@
+# GHC Processor emulator
+
+let(
+  [
+    [mem . require('./memory')],
+    [index . require('../lib/index')]
+  ], let(
+  [
+    [memory . mem()]
+  ], let(
+  [
+    [create . index(memory, 0)],
+    [get . index(memory, 1)],
+    [set . index(memory, 2)]
+  ], let(
+  [
+    [registers . {create(9)}],
+    [data . {create(256)}],
+    [code . {create(256)}]
+  ], let(
+  [
+    [create . {cons(registers(), cons(data(), code()))}],
+  ], letrec(
+  [
+    [registers . {|state|
+#debug(2),
+#debug(state),
+      car(state)
+    }],
+    [data . {|state| car(cdr(state)) }],
+    [code . {|state| cdr(cdr(state)) }],
+    [register . {|state, num|
+#debug(3),
+#debug(num),
+      get(registers(state), num)
+    }],
+    [pc . {|state| register(state, 8) }],
+    [setRegisters . {|state, registers|
+#debug(5),
+#debug(registers),
+      cons(registers, cons(car(cdr(state)), cdr(cdr(state))))
+    }],
+    [setPC . {|state, pc|
+#debug(6),
+#debug(pc),
+      cons(set(registers, 8, pc), cons(car(cdr(state)), cdr(cdr(state))))
+    }],
+    [setData . {|state, data| cons(car(state), cons(data, cdr(cdr(state)))) }],
+    [setCode . {|state, code| cons(car(state), cons(car(cdr(state)), code)) }]
+  ],
+
+  list(
+    create,         # 0
+    register,       # 1
+    pc,             # 2
+    data,           # 3
+    code,           # 4
+    setRegisters,   # 5
+    setPC,          # 6
+    setData,        # 7
+    setCode,        # 8
+  )
+
+))))))

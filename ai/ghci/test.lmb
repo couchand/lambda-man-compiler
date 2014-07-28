@@ -1,0 +1,72 @@
+# try running this thing
+
+let(
+  [
+    [index . require('../lib/index')],
+    [mem . require('./memory')],
+    [proc . require('./proc')]
+  ], let(
+  [
+    [memory . mem()],
+    [processor . proc()]
+  ], let(
+  [
+    [get . index(memory, 1)],
+    [set . index(memory, 2)],
+    [create       . index(processor, 0)],
+    [register     . index(processor, 1)],
+    [pc           . index(processor, 2)],
+    [data         . index(processor, 3)],
+    [code         . index(processor, 4)],
+    [setRegisters . index(processor, 5)],
+    [setPC        . index(processor, 6)],
+    [setData      . index(processor, 7)],
+    [setCode      . index(processor, 8)]
+  ], let(
+  [
+    [mov . {|state, dest, src|
+#debug([0.0]),
+#debug(dest),
+#debug(src),
+      let(
+        [[value . if(=(0, car(src)), register(state, cdr(src)),
+                  if(=(1, car(src)), get(data(state), register(state, cdr(src))),
+                  if(=(2, car(src)), cdr(src),
+                  if(=(3, car(src)), get(data(state), cdr(src)),
+                    /(0,0)))))]],
+
+        if(=(0, car(dest)), setRegisters(state, set(car(state), cdr(dest), value)),
+        if(=(1, car(dest)), setData(state, set(data(state), register(state, cdr(dest)), value)),
+        if(=(3, car(dest)), setData(state, set(data(state), cdr(dest), value)),
+          /(0,0))))
+
+      )
+    }]
+  ], let(
+  [
+    [execute . {|state, instruction|
+#debug(99),
+#debug(instruction),
+      letrec(
+        [
+          [next . if(=(0, car(instruction)), mov(state, car(cdr(instruction)), car(cdr(cdr(instruction)))),
+                      /(0, 0))],
+          [finish . {
+#debug(142),
+#debug(pc(state)),
+#debug(pc(next)),
+        if(
+          =(pc(state), pc(next)),
+          setPC(next, +(pc(next), 1)),
+          next
+        )
+          }]
+        ],
+        finish()
+      )
+    }]
+  ],
+
+  debug(execute(create(), cons(0, cons(cons(0, 0), cons(cons(2, 42), 0)))))
+
+)))))
